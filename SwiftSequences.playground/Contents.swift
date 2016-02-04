@@ -46,7 +46,7 @@ func <+>(blockBox1: BlockBox, blockBox2: BlockBox) -> BlockBox {
     }
 }
 
-// Sample
+// Sample with sequence of actions
 
 let sequence1 = { print("step #1") } <+> { print("step #2") } <+> nil <+> { print("step #3") }
 let sequence2 = { print("step #4") } <+> { print("step #5") } <+> { print("step #6") }
@@ -59,28 +59,46 @@ sequence4.invoke()
 
 typealias BlockWithCompletionBlock = (Block -> Void)?
 
-func doSmth(logic: BlockWithCompletionBlock) {
-    logic <^> { print("completion handler") }
+func doSmth(logic: BlockWithCompletionBlock) -> Block {
+    return logic <^> { print("completion handler") }
 }
 
 infix operator <^> { associativity left }
-func <^>(f1: BlockWithCompletionBlock, f2: Block) {
+func <^>(f1: BlockWithCompletionBlock, f2: Block) -> Block {
     if let f1 = f1 {
-        f1(f2)
+        return { f1(f2) }
     }
-    else {
-        f2?()
-    }
+    
+    return { f2?() }
 }
 
-// Sample
+// Sample with completion handler
 
-doSmth { completionHandler in
+let logic1 = doSmth { completionHandler in
     print("logic #1")
     completionHandler?()
 }
 
-doSmth { completionHandler in
+let logic2 = doSmth { completionHandler in
     print("logic #2")
     completionHandler?()
 }
+
+logic1?()
+logic2?()
+
+///////////
+
+func <^>(blockBox: BlockBox, finalisingBlock: Block) {
+    blockBox.invoke()
+    finalisingBlock?()
+}
+
+// Sample with sequence + completion handler
+
+sequence4 <^> logic1
+
+let navigationController = UINavigationController()
+
+let completionHandler = { print("was dismissed") }
+sequence4 <^> { navigationController.dismissViewControllerAnimated(true, completion: completionHandler) }
