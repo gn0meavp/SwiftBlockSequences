@@ -59,7 +59,7 @@ sequence4.invoke()
 
 typealias BlockWithCompletionBlock = (Block -> Void)?
 
-func doSmth(logic: BlockWithCompletionBlock) -> Block {
+func doSmth(logic: BlockWithCompletionBlock = nil) -> Block {
     return logic <^> { print("completion handler") }
 }
 
@@ -79,10 +79,7 @@ let logic1 = doSmth { completionHandler in
     completionHandler?()
 }
 
-let logic2 = doSmth { completionHandler in
-    print("logic #2")
-    completionHandler?()
-}
+let logic2 = doSmth()       // without additional logic
 
 logic1?()
 logic2?()
