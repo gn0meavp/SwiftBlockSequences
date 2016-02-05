@@ -59,30 +59,28 @@ sequence4.invoke()
 
 typealias BlockWithCompletionBlock = (Block -> Void)?
 
-func doSmth(logic: BlockWithCompletionBlock = nil) -> Block {
-    return logic <^> { print("completion handler") }
-}
-
 infix operator <^> { associativity left }
-func <^>(f1: BlockWithCompletionBlock, f2: Block) -> Block {
+func <^>(f1: BlockWithCompletionBlock, f2: Block) {
     if let f1 = f1 {
-        return { f1(f2) }
+        f1(f2)
     }
-    
-    return { f2?() }
+    else {
+        f2?()
+    }
 }
 
 // Sample with completion handler
 
-let logic1 = doSmth { completionHandler in
-    print("logic #1")
+func doSmth(logic: BlockWithCompletionBlock = nil) {
+    logic <^> { print("completion handler") }
+}
+
+doSmth { completionHandler in
+    print("doing something")
     completionHandler?()
 }
 
-let logic2 = doSmth()       // without additional logic
-
-logic1?()
-logic2?()
+doSmth()       // without additional logic
 
 ///////////
 
@@ -93,7 +91,7 @@ func <^>(blockBox: BlockBox, finalisingBlock: Block) {
 
 // Sample with sequence + completion handler
 
-sequence4 <^> logic1
+sequence4 <^> { print("sample #4") }
 
 let navigationController = UINavigationController()
 
